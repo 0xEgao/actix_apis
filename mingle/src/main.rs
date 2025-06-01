@@ -1,0 +1,19 @@
+use actix_web::{get, App, HttpResponse, HttpServer, Responder};
+
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello from actix web")
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| App::new().service(hellofromsarthak))
+        .bind(("localhost", 5001))?
+        .run()
+        .await
+}
+
+#[get("/sarthak")]
+async fn hellofromsarthak() -> impl Responder {
+    HttpResponse::Ok().body("Hello from Sarthak")
+}
