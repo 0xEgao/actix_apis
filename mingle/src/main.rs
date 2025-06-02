@@ -1,7 +1,7 @@
 use actix_web::{App, HttpResponse, HttpServer, Responder, get};
 
 pub mod models;
-
+pub mod services;
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello from actix web")
