@@ -1,6 +1,7 @@
 use actix_web::{App, HttpResponse, HttpServer, Responder, get};
 
 pub mod models;
+pub mod routes;
 pub mod services;
 #[get("/")]
 async fn hello() -> impl Responder {
