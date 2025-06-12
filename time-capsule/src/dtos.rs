@@ -1,5 +1,3 @@
-//data transfer object file as the name suggest used to exchange data between frontend backend blah blah blah....
-
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -19,13 +17,12 @@ pub struct Capsule {
     pub email_sent: Option<bool>,
 }
 
-//Request Struct
 #[derive(Debug, Deserialize, Validate)]
 pub struct CreateCapsuleRequest {
     #[validate(length(min = 1, message = "Name is required"))]
     pub name: String,
 
-    #[validate(email(message = "Invalid email format"))]
+    #[validate(email(message = "Invalid Email format"))]
     pub email: String,
 
     #[validate(length(min = 1, message = "Title is required"))]
@@ -36,8 +33,6 @@ pub struct CreateCapsuleRequest {
 
     pub unlock_at: DateTime<Utc>,
 }
-
-//Response Struct
 
 #[derive(Debug, Serialize)]
 pub struct CreateCapsuleResponse {
