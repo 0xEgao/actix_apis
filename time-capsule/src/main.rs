@@ -65,7 +65,7 @@ async fn main() {
 
     let cors = CorsLayer::new()
         .allow_origin(
-            "https://time-capsule-rusty.vercel.app/"
+            "https://time-capsule-rusty.vercel.app"
                 .parse::<HeaderValue>()
                 .unwrap(),
         )
