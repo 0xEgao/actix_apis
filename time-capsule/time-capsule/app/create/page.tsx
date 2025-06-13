@@ -1,43 +1,85 @@
-"use client"
+'use client';
 
-import type React from "react"
-
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Clock, ArrowLeft, Send, Sparkles } from "lucide-react"
+import type React from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Clock, ArrowLeft, Send, Sparkles } from 'lucide-react';
 
 export default function CreateMessagePage() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-    deliveryDate: "",
-    deliveryTime: "12:00",
-  })
+    name: '',
+    email: '',
+    title: '', // Changed from subject to match backend
+    message: '',
+    deliveryDate: '',
+    deliveryTime: '12:00',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically send the data to your backend
-    console.log("Time capsule message:", formData)
-    alert("Your time capsule message has been created! You'll receive it on the scheduled date.")
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    setSuccess(false);
+
+    // Format unlock_at to ISO string (e.g., "2025-06-14T11:53:12.922961Z")
+    const unlockAt = new Date(`${formData.deliveryDate}T${formData.deliveryTime}:00`).toISOString();
+
+    const payload = {
+      name: formData.name,
+      email: formData.email,
+      title: formData.title,
+      message: formData.message,
+      unlock_at: unlockAt,
+    };
+
+    try {
+      const response = await fetch('https://timecapsule-u7ec.onrender.com/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create time capsule');
+      }
+
+      setSuccess(true);
+      setFormData({
+        name: '',
+        email: '',
+        title: '',
+        message: '',
+        deliveryDate: '',
+        deliveryTime: '12:00',
+      });
+      alert('Your time capsule message has been created! You’ll receive it on the scheduled date.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while creating the time capsule');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Get today's date in YYYY-MM-DD format for min date
-  const today = new Date().toISOString().split("T")[0]
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative overflow-hidden">
@@ -46,15 +88,15 @@ export default function CreateMessagePage() {
         <div className="absolute top-20 left-10 w-24 h-24 border border-gray-200 rounded-full opacity-30 animate-pulse"></div>
         <div
           className="absolute top-60 right-20 w-32 h-32 border border-gray-300 rounded-full opacity-20 animate-pulse"
-          style={{ animationDelay: "1s" }}
+          style={{ animationDelay: '1s' }}
         ></div>
         <div
           className="absolute bottom-40 left-20 w-28 h-28 border border-gray-200 rounded-full opacity-25 animate-pulse"
-          style={{ animationDelay: "2s" }}
+          style={{ animationDelay: '2s' }}
         ></div>
         <div
           className="absolute bottom-20 right-10 w-36 h-36 border border-gray-300 rounded-full opacity-30 animate-pulse"
-          style={{ animationDelay: "3s" }}
+          style={{ animationDelay: '3s' }}
         ></div>
 
         {/* Floating sparkles */}
@@ -161,17 +203,17 @@ export default function CreateMessagePage() {
                   </div>
                 </div>
 
-                {/* Subject */}
+                {/* Title */}
                 <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-sm font-medium">
-                    Subject
+                  <Label htmlFor="title" className="text-sm font-medium">
+                    Title
                   </Label>
                   <Input
-                    id="subject"
-                    name="subject"
+                    id="title"
+                    name="title"
                     type="text"
                     placeholder="What is this message about?"
-                    value={formData.subject}
+                    value={formData.title}
                     onChange={handleInputChange}
                     required
                     className="border-gray-300 focus:border-black focus:ring-black transition-all duration-300 hover:shadow-md"
@@ -251,15 +293,26 @@ Take your time and write from the heart..."
                   </p>
                 </div>
 
+                {/* Error/Success Messages */}
+                {error && (
+                  <p className="text-red-500 text-sm text-center">{error}</p>
+                )}
+                {success && (
+                  <p className="text-green-500 text-sm text-center">
+                    Time capsule created successfully!
+                  </p>
+                )}
+
                 {/* Submit Button */}
                 <div className="pt-6">
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full bg-gradient-to-r from-black to-gray-800 hover:from-gray-800 hover:to-black text-white py-3 text-lg font-medium transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-black to-gray-800 hover:from-gray-800 hover:to-black text-white py-3 text-lg font-medium transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50"
                   >
                     <Send className="h-5 w-5 mr-2" />
-                    Send to Future Me
+                    {isSubmitting ? 'Sending...' : 'Send to Future Me'}
                   </Button>
                 </div>
               </form>
@@ -277,5 +330,5 @@ Take your time and write from the heart..."
         </div>
       </main>
     </div>
-  )
+  );
 }
