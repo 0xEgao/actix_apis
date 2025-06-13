@@ -50,7 +50,7 @@ async fn main() {
                 .unwrap()
                 .statement_cache_capacity(0), // Automatically re-prepare statements
                                               // .disable_statement_cache() // Alternative: disable prepared statements
-        )``
+        )
         .await
     {
         Ok(pool) => {
