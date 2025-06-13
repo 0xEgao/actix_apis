@@ -2256,6 +2256,7 @@ dependencies = [
  "tower",
  "tower-http",
  "tracing-subscriber",
+ "url",
  "uuid",
  "validator",
 ]

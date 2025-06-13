@@ -12,7 +12,10 @@ use config::Config;
 use db::DBClient;
 use dotenv::dotenv;
 use handler::{create_capsule, get_all_capsules, get_capsule_by_public_id};
-use sqlx::postgres::PgPoolOptions;
+use sqlx::{
+    ConnectOptions,
+    postgres::{PgConnectOptions, PgPoolOptions},
+};
 use tower_http::cors::CorsLayer;
 use tracing_subscriber::filter::LevelFilter;
 
@@ -37,10 +40,17 @@ async fn main() {
     dotenv().ok();
 
     let config = Config::init();
-
     let pool = match PgPoolOptions::new()
-        .max_connections(10)
-        .connect(&config.database_url)
+        .max_connections(5)
+        .min_connections(1)
+        .idle_timeout(std::time::Duration::from_secs(30))
+        .max_lifetime(std::time::Duration::from_secs(500))
+        .connect_with(
+            PgConnectOptions::from_url(&url::Url::parse(&config.database_url).unwrap())
+                .unwrap()
+                .statement_cache_capacity(0), // Automatically re-prepare statements
+                                              // .disable_statement_cache() // Alternative: disable prepared statements
+        )
         .await
     {
         Ok(pool) => {
