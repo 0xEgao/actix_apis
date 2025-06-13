@@ -50,7 +50,7 @@ async fn main() {
                 .unwrap()
                 .statement_cache_capacity(0), // Automatically re-prepare statements
                                               // .disable_statement_cache() // Alternative: disable prepared statements
-        )
+        )``
         .await
     {
         Ok(pool) => {
@@ -87,7 +87,7 @@ async fn main() {
         format!("Server is running on http://localhost:{}", &config.port),
     );
 
-    let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{}", &config.port))
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", &config.port))
         .await
         .unwrap();
 
